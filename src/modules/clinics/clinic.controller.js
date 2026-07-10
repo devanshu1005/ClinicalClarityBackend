@@ -85,9 +85,9 @@ const getClinicById = async (req, res, next) => {
       });
     }
 
-    const clinic = await clinicService.getClinicById(id);
+    const result = await clinicService.getClinicById(id);
 
-    if (!clinic) {
+    if (!result) {
       return res.status(404).json({
         success: false,
         message: 'Clinic not found',
@@ -97,7 +97,7 @@ const getClinicById = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: 'Clinic fetched successfully',
-      data: clinic,
+      data: result,
     });
   } catch (error) {
     next(error);
