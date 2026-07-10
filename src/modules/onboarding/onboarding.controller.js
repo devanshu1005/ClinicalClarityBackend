@@ -47,32 +47,15 @@ const createOnboarding = async (req, res, next) => {
   }
 };
 
-const getOnboardingByIndex = async (req, res, next) => {
+const getAllOnboarding = async (req, res, next) => {
   try {
-    const { index } = req.query;
-
-    if (index === undefined || index === null || index === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'index query param is required',
-      });
-    }
-
-    const onboarding = await onboardingService.getOnboardingByIndex(
-      Number(index)
-    );
-
-    if (!onboarding) {
-      return res.status(404).json({
-        success: false,
-        message: `No onboarding data found for index ${index}`,
-      });
-    }
+    const onboardingItems = await onboardingService.getAllOnboarding();
 
     return res.status(200).json({
       success: true,
       message: 'Onboarding data fetched successfully',
-      data: onboarding,
+      count: onboardingItems.length,
+      data: onboardingItems,
     });
   } catch (error) {
     next(error);
@@ -81,5 +64,5 @@ const getOnboardingByIndex = async (req, res, next) => {
 
 module.exports = {
   createOnboarding,
-  getOnboardingByIndex,
+  getAllOnboarding,
 };

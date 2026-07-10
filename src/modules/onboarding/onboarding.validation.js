@@ -13,16 +13,6 @@ const createOnboardingSchema = z.object({
   }),
 });
 
-const getOnboardingByIndexSchema = z.object({
-  query: z.object({
-    index: z.coerce.number({
-      required_error: 'Index is required',
-      invalid_type_error: 'Index must be a number',
-    }),
-  }),
-});
-
 module.exports = {
   createOnboardingSchema,
-  getOnboardingByIndexSchema,
 };

@@ -5,12 +5,18 @@ const createOnboarding = async (payload) => {
   return onboarding;
 };
 
-const getOnboardingByIndex = async (index) => {
-  const onboarding = await Onboarding.findOne({ index });
-  return onboarding;
+// const getOnboardingByIndex = async (index) => {
+//   const onboarding = await Onboarding.findOne({ index });
+//   return onboarding;
+// };
+
+const getAllOnboarding = async () => {
+  const onboardingItems = await Onboarding.find({}).sort({ index: 1 });
+  return onboardingItems;
 };
 
 module.exports = {
   createOnboarding,
-  getOnboardingByIndex,
+  // getOnboardingByIndex,
+  getAllOnboarding,
 };
