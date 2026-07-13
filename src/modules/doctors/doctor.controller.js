@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const doctorService = require('./doctor.service');
+const generateSlots = require('../../utils/slotGenerator');
 
 const createDoctor = async (req, res, next) => {
   try {
@@ -11,6 +12,7 @@ const createDoctor = async (req, res, next) => {
       profileImage,
       bio,
       clinicIds,
+      availability,
     } = req.body;
 
     if (!name || !specialization) {
@@ -55,6 +57,7 @@ const createDoctor = async (req, res, next) => {
       profileImage,
       bio,
       clinicIds,
+      availability,
     });
 
     return res.status(201).json({
@@ -85,6 +88,8 @@ const getAllDoctors = async (req, res, next) => {
 const getDoctorById = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { date } = req.query;
+
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -93,9 +98,21 @@ const getDoctorById = async (req, res, next) => {
       });
     }
 
-    const doctor = await doctorService.getDoctorById(id);
+    if (!date) {
 
-    if (!doctor) {
+      return res.status(400).json({
+
+        success: false,
+
+        message: "date is required"
+
+      });
+
+    }
+
+    const result = await doctorService.getDoctorById(id, date);
+
+    if (!result) {
       return res.status(404).json({
         success: false,
         message: 'Doctor not found',
@@ -105,7 +122,7 @@ const getDoctorById = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: 'Doctor fetched successfully',
-      data: doctor,
+      data: result,
     });
   } catch (error) {
     next(error);

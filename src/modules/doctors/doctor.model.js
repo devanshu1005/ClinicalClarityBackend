@@ -46,6 +46,35 @@ const doctorSchema = new mongoose.Schema(
       },
     ],
 
+    availability: {
+      workingDays: [
+        {
+          type: String,
+          enum: [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday'
+          ]
+        }
+      ],
+
+      startTime: {
+        type: String
+      },
+
+      endTime: {
+        type: String
+      },
+
+      slotDuration: {
+        type: Number
+      }
+    },
+
     isActive: {
       type: Boolean,
       default: true,
