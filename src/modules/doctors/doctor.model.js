@@ -38,6 +38,18 @@ const doctorSchema = new mongoose.Schema(
       trim: true,
     },
 
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
+
     clinicIds: [
       {
         type: mongoose.Schema.Types.ObjectId,

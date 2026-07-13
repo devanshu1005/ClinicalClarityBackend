@@ -10,7 +10,7 @@ const bookAppointment = async (req, res, next) => {
       endTime,
     } = req.body;
 
-   const patientId = req.user.userId;
+    const patientId = req.user.userId;
 
     if (
       !doctorId ||
@@ -28,6 +28,7 @@ const bookAppointment = async (req, res, next) => {
     const appointment = await appointmentService.bookAppointment({
       doctorId,
       clinicId,
+      patientId,
       appointmentDate,
       startTime,
       endTime,
