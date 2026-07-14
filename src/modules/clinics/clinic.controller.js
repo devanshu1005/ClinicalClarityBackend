@@ -18,14 +18,23 @@ const createClinic = async (req, res, next) => {
       doctorPreviewImages,
       infoCard,
       ctaLabel,
-      coordinates,
+      latitude,
+      longitude,
     } = req.body;
 
-    if (!name || !shortAddress || !fullAddress || !thumbnailImage || !coverImage) {
+    if (
+      !name ||
+      !shortAddress ||
+      !fullAddress ||
+      !thumbnailImage ||
+      !coverImage ||
+      latitude === undefined ||
+      longitude === undefined
+    ) {
       return res.status(400).json({
         success: false,
         message:
-          'name, shortAddress, fullAddress, thumbnailImage, and coverImage are required',
+          'name, shortAddress, fullAddress, thumbnailImage, coverImage, latitude and longitude are required',
       });
     }
 
@@ -46,7 +55,13 @@ const createClinic = async (req, res, next) => {
         : [],
       infoCard: infoCard || {},
       ctaLabel: ctaLabel || 'Get Directions',
-      coordinates: coordinates || {},
+      location: {
+        type: 'Point',
+        coordinates: [
+          Number(longitude),
+          Number(latitude),
+        ],
+      },
     });
 
     return res.status(201).json({

@@ -129,8 +129,40 @@ const getDoctorById = async (req, res, next) => {
   }
 };
 
+const getNearbyDoctors = async (req, res, next) => {
+  try {
+    const { latitude, longitude, radius = 5000 } = req.query;
+
+    if (
+      latitude === undefined ||
+      longitude === undefined
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'latitude and longitude are required',
+      });
+    }
+
+    const doctors = await doctorService.getNearbyDoctors(
+      Number(latitude),
+      Number(longitude),
+      Number(radius)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Nearby doctors fetched successfully',
+      count: doctors.length,
+      data: doctors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createDoctor,
   getAllDoctors,
   getDoctorById,
+  getNearbyDoctors,
 };

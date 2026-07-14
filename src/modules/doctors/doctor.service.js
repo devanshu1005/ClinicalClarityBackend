@@ -93,10 +93,127 @@ const getDoctorsByClinicId = async (clinicId) => {
   return doctors;
 };
 
+const getNearbyDoctors = async (
+  latitude,
+  longitude,
+  radius
+) => {
+  const doctors = await Clinic.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [longitude, latitude],
+        },
+        distanceField: 'distance',
+        maxDistance: radius,
+        spherical: true,
+        query: {
+          isActive: true,
+        },
+      },
+    },
+
+    {
+      $lookup: {
+        from: 'doctors',
+        localField: '_id',
+        foreignField: 'clinicIds',
+        as: 'doctors',
+      },
+    },
+
+    {
+      $unwind: '$doctors',
+    },
+
+    {
+      $match: {
+        'doctors.isActive': true,
+      },
+    },
+
+    // A doctor can belong to multiple clinics.
+    // Keep only the nearest clinic for each doctor.
+    {
+      $sort: {
+        distance: 1,
+      },
+    },
+
+    {
+      $group: {
+        _id: '$doctors._id',
+
+        doctor: {
+          $first: '$doctors',
+        },
+
+        nearestClinic: {
+          $first: {
+            _id: '$_id',
+            name: '$name',
+            shortAddress: '$shortAddress',
+            fullAddress: '$fullAddress',
+            thumbnailImage: '$thumbnailImage',
+            coverImage: '$coverImage',
+            distanceInMeters: '$distance',
+          },
+        },
+      },
+    },
+
+    {
+      $addFields: {
+        'nearestClinic.distanceInKm': {
+          $round: [
+            {
+              $divide: [
+                '$nearestClinic.distanceInMeters',
+                1000,
+              ],
+            },
+            2,
+          ],
+        },
+      },
+    },
+
+    {
+      $project: {
+        _id: 0,
+
+        doctor: {
+          _id: '$doctor._id',
+          name: '$doctor.name',
+          specialization: '$doctor.specialization',
+          qualification: '$doctor.qualification',
+          experienceYears: '$doctor.experienceYears',
+          profileImage: '$doctor.profileImage',
+          bio: '$doctor.bio',
+          averageRating: '$doctor.averageRating',
+          totalReviews: '$doctor.totalReviews',
+        },
+
+        nearestClinic: 1,
+      },
+    },
+
+    {
+      $sort: {
+        'nearestClinic.distanceInMeters': 1,
+      },
+    },
+  ]);
+
+  return doctors;
+};
+
 module.exports = {
   createDoctor,
   getAllDoctors,
   getDoctorById,
   validateClinicIds,
   getDoctorsByClinicId,
+  getNearbyDoctors,
 };

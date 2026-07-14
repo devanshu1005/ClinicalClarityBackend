@@ -96,14 +96,15 @@ const clinicSchema = new mongoose.Schema(
       trim: true,
     },
 
-    coordinates: {
-      latitude: {
-        type: Number,
-        default: null,
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
       },
-      longitude: {
-        type: Number,
-        default: null,
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: true,
       },
     },
 
@@ -116,6 +117,10 @@ const clinicSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+clinicSchema.index({
+  location: '2dsphere',
+});
 
 const Clinic = mongoose.model('Clinic', clinicSchema);
 

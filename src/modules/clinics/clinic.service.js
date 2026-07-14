@@ -21,7 +21,9 @@ const getClinicById = async (clinicId) => {
   const doctors = await Doctor.find({
     clinicIds: clinic._id,
     isActive: true,
-  }).select('name specialization qualification experienceYears profileImage bio clinicIds');
+  }).select(
+    'name specialization qualification experienceYears profileImage bio averageRating totalReviews clinicIds'
+  );
 
   return {
     clinic,
