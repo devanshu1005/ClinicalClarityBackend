@@ -119,8 +119,40 @@ const getClinicById = async (req, res, next) => {
   }
 };
 
+const getNearbyClinics = async (req, res, next) => {
+  try {
+    const { latitude, longitude, radius = 5000 } = req.query;
+
+    if (
+      latitude === undefined ||
+      longitude === undefined
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'latitude and longitude are required',
+      });
+    }
+
+    const clinics = await clinicService.getNearbyClinics(
+      Number(latitude),
+      Number(longitude),
+      Number(radius)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Nearby clinics fetched successfully',
+      count: clinics.length,
+      data: clinics,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createClinic,
   getAllClinics,
   getClinicById,
+  getNearbyClinics,
 };

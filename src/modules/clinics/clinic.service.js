@@ -31,8 +31,68 @@ const getClinicById = async (clinicId) => {
   };
 };
 
+const getNearbyClinics = async (
+  latitude,
+  longitude,
+  radius
+) => {
+  return Clinic.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [
+            longitude,
+            latitude,
+          ],
+        },
+
+        distanceField: 'distanceInMeters',
+
+        maxDistance: radius,
+
+        spherical: true,
+
+        query: {
+          isActive: true,
+        },
+      },
+    },
+
+    {
+      $addFields: {
+        distanceInKm: {
+          $round: [
+            {
+              $divide: [
+                '$distanceInMeters',
+                1000,
+              ],
+            },
+            2,
+          ],
+        },
+      },
+    },
+
+    {
+      $project: {
+        __v: 0,
+        location: 0,
+      },
+    },
+
+    {
+      $sort: {
+        distanceInMeters: 1,
+      },
+    },
+  ]);
+};
+
 module.exports = {
   createClinic,
   getAllClinics,
   getClinicById,
+  getNearbyClinics,
 };

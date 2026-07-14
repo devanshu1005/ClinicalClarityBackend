@@ -160,9 +160,29 @@ const getNearbyDoctors = async (req, res, next) => {
   }
 };
 
+const getPopularDoctors = async (req, res, next) => {
+  try {
+    const { limit = 10 } = req.query;
+
+    const doctors = await doctorService.getPopularDoctors(
+      Number(limit)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Popular doctors fetched successfully',
+      count: doctors.length,
+      data: doctors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createDoctor,
   getAllDoctors,
   getDoctorById,
   getNearbyDoctors,
+  getPopularDoctors,
 };

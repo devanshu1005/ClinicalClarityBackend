@@ -209,6 +209,63 @@ const getNearbyDoctors = async (
   return doctors;
 };
 
+const getPopularDoctors = async (limit = 10) => {
+  return Doctor.aggregate([
+    {
+      $match: {
+        isActive: true,
+      },
+    },
+
+    {
+      $sort: {
+        averageRating: -1,
+        totalReviews: -1,
+      },
+    },
+
+    {
+      $limit: limit,
+    },
+
+    {
+      $lookup: {
+        from: 'clinics',
+        localField: 'clinicIds',
+        foreignField: '_id',
+        as: 'clinics',
+      },
+    },
+
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        specialization: 1,
+        qualification: 1,
+        experienceYears: 1,
+        profileImage: 1,
+        bio: 1,
+        averageRating: 1,
+        totalReviews: 1,
+
+        clinics: {
+          $map: {
+            input: '$clinics',
+            as: 'clinic',
+            in: {
+              _id: '$$clinic._id',
+              name: '$$clinic.name',
+              shortAddress: '$$clinic.shortAddress',
+              thumbnailImage: '$$clinic.thumbnailImage',
+            },
+          },
+        },
+      },
+    },
+  ]);
+};
+
 module.exports = {
   createDoctor,
   getAllDoctors,
@@ -216,4 +273,5 @@ module.exports = {
   validateClinicIds,
   getDoctorsByClinicId,
   getNearbyDoctors,
+  getPopularDoctors,
 };
