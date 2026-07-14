@@ -266,6 +266,145 @@ const getPopularDoctors = async (limit = 10) => {
   ]);
 };
 
+const searchDoctors = async (query) => {
+
+  return Doctor.aggregate([
+
+    {
+      $match: {
+        isActive: true,
+      },
+    },
+
+    {
+      $lookup: {
+        from: "clinics",
+        localField: "clinicIds",
+        foreignField: "_id",
+        as: "clinics",
+      },
+    },
+
+    {
+      $match: {
+
+        $or: [
+
+          {
+            name: {
+              $regex: query,
+              $options: "i",
+            },
+          },
+
+          {
+            specialization: {
+              $regex: query,
+              $options: "i",
+            },
+          },
+
+          {
+            qualification: {
+              $regex: query,
+              $options: "i",
+            },
+          },
+
+          {
+            "clinics.name": {
+              $regex: query,
+              $options: "i",
+            },
+          },
+
+          {
+            "clinics.shortAddress": {
+              $regex: query,
+              $options: "i",
+            },
+          },
+
+          {
+            "clinics.fullAddress": {
+              $regex: query,
+              $options: "i",
+            },
+          },
+
+        ],
+
+      },
+    },
+
+    {
+      $project: {
+
+        _id: 1,
+
+        name: 1,
+
+        specialization: 1,
+
+        qualification: 1,
+
+        experienceYears: 1,
+
+        profileImage: 1,
+
+        averageRating: 1,
+
+        totalReviews: 1,
+
+        clinics: {
+
+          $map: {
+
+            input: "$clinics",
+
+            as: "clinic",
+
+            in: {
+
+              _id: "$$clinic._id",
+
+              name: "$$clinic.name",
+
+              shortAddress:
+                "$$clinic.shortAddress",
+
+              thumbnailImage:
+                "$$clinic.thumbnailImage",
+
+            },
+
+          },
+
+        },
+
+      },
+
+    },
+
+    {
+      $sort: {
+
+        averageRating: -1,
+
+        totalReviews: -1,
+
+      },
+
+    },
+
+    {
+      $limit: 20,
+    },
+
+  ]);
+
+};
+
 module.exports = {
   createDoctor,
   getAllDoctors,
@@ -274,4 +413,5 @@ module.exports = {
   getDoctorsByClinicId,
   getNearbyDoctors,
   getPopularDoctors,
+  searchDoctors,
 };

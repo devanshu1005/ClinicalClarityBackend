@@ -179,10 +179,36 @@ const getPopularDoctors = async (req, res, next) => {
   }
 };
 
+const searchDoctors = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || !q.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query is required',
+      });
+    }
+
+    const doctors =
+      await doctorService.searchDoctors(q);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Doctors fetched successfully',
+      count: doctors.length,
+      data: doctors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createDoctor,
   getAllDoctors,
   getDoctorById,
   getNearbyDoctors,
   getPopularDoctors,
+  searchDoctors,
 };
