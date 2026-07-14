@@ -15,7 +15,7 @@ router.use('/auth', require('../modules/auth/auth.routes'));
 router.use('/clinics', require('../modules/clinics/clinic.routes'));
 router.use('/doctors', require('../modules/doctors/doctor.routes'));
 router.use('/appointments', require('../modules/appointments/appointment.routes'));
-router.use('/reviews', require('../modules/reviews/doctorReview.routes')
-);
+router.use('/reviews', require('../modules/reviews/doctorReview.routes'));
+router.use('/dashboard', require('../modules/dashboard/dashboard.routes'));
 
 module.exports = router;
