@@ -20,12 +20,10 @@ const getDashboard = async ({
   const today =
     new Date().toISOString().split('T')[0];
 
-  const [
-    upcomingAppointments,
-    popularDoctors,
-    nearbyDoctors,
-    nearbyClinics,
-  ] = await Promise.all([
+ const promises = [];
+
+if (userId) {
+  promises.push(
     Appointment.find({
       patientId: userId,
       appointmentDate: {
@@ -47,24 +45,53 @@ const getDashboard = async ({
       })
       .limit(
         DASHBOARD_LIMITS.UPCOMING_APPOINTMENTS
-      ),
+      )
+  );
+}
 
-    doctorService.getPopularDoctors(
-      DASHBOARD_LIMITS.POPULAR_DOCTORS
-    ),
+promises.push(
+  doctorService.getPopularDoctors(
+    DASHBOARD_LIMITS.POPULAR_DOCTORS
+  )
+);
 
-    doctorService.getNearbyDoctors(
-      latitude,
-      longitude,
-      DASHBOARD_LIMITS.SEARCH_RADIUS_METERS
-    ),
+promises.push(
+  doctorService.getNearbyDoctors(
+    latitude,
+    longitude,
+    DASHBOARD_LIMITS.SEARCH_RADIUS_METERS
+  )
+);
 
-    clinicService.getNearbyClinics(
-      latitude,
-      longitude,
-      DASHBOARD_LIMITS.SEARCH_RADIUS_METERS
-    ),
-  ]);
+promises.push(
+  clinicService.getNearbyClinics(
+    latitude,
+    longitude,
+    DASHBOARD_LIMITS.SEARCH_RADIUS_METERS
+  )
+);
+
+const results = await Promise.all(promises);
+
+let upcomingAppointments = [];
+let popularDoctors;
+let nearbyDoctors;
+let nearbyClinics;
+
+if (userId) {
+  [
+    upcomingAppointments,
+    popularDoctors,
+    nearbyDoctors,
+    nearbyClinics,
+  ] = results;
+} else {
+  [
+    popularDoctors,
+    nearbyDoctors,
+    nearbyClinics,
+  ] = results;
+}
 
   return {
     sections: [

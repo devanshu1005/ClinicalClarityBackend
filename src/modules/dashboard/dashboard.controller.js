@@ -22,7 +22,7 @@ const getDashboard = async (
 
     const dashboard =
       await dashboardService.getDashboard({
-        userId: req.user.userId,
+        userId: req.user?.userId || null,
         latitude: Number(latitude),
         longitude: Number(longitude),
       });
