@@ -1,0 +1,32 @@
+const DOCTOR_SPECIALIZATIONS = [
+  'General Physician',
+  'Cardiologist',
+  'Dermatologist',
+  'Dentist',
+  'Pediatrician',
+  'Gynecologist',
+  'Orthopedic Surgeon',
+  'Neurologist',
+  'Psychiatrist',
+  'Ophthalmologist',
+  'ENT Specialist',
+  'Urologist',
+  'Nephrologist',
+  'Pulmonologist',
+  'Gastroenterologist',
+  'Endocrinologist',
+  'Oncologist',
+  'Rheumatologist',
+  'Radiologist',
+  'Pathologist',
+  'Anesthesiologist',
+  'Plastic Surgeon',
+  'General Surgeon',
+  'Physiotherapist',
+  'Nutritionist',
+  'Clinical Psychologist',
+];
+
+module.exports = {
+  DOCTOR_SPECIALIZATIONS,
+};
