@@ -350,6 +350,8 @@ const searchDoctors = async (query) => {
 
         experienceYears: 1,
 
+        consultationFee: 1,
+
         profileImage: 1,
 
         averageRating: 1,
