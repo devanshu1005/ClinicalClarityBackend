@@ -24,8 +24,9 @@ const getDoctorById = async (
   const doctor = await Doctor.findById(doctorId)
     .populate(
       'clinicIds',
-      'name shortAddress'
-    );
+      'name shortAddress location'
+    )
+    .lean();
 
   if (!doctor) {
     return null;
@@ -73,8 +74,15 @@ const getDoctorById = async (
     };
   }
 
+  const {
+    clinicIds,
+    ...doctorData
+  } = doctor;
+
+  doctorData.clinics = clinicIds;
+
   return {
-    doctor,
+    doctor: doctorData,
     availableSlots,
   };
 };
