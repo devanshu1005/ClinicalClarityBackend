@@ -16,7 +16,7 @@ const optionalAuth = (req, res, next) => {
 
     if (!token) {
       req.user = null;
-      return next();
+      return next(); 
     }
 
     const decoded = jwt.verify(
@@ -27,7 +27,9 @@ const optionalAuth = (req, res, next) => {
     req.user = decoded;
 
     next();
-  } catch (error) {
+  }
+   catch (error) {
+
     // Invalid token should not block guest users
     req.user = null;
     next();

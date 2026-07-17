@@ -9,8 +9,10 @@ const createDoctor = async (req, res, next) => {
       specialization,
       qualification,
       experienceYears,
+      consultationFee,
       profileImage,
       bio,
+      languages,
       clinicIds,
       availability,
     } = req.body;
@@ -54,8 +56,10 @@ const createDoctor = async (req, res, next) => {
       specialization,
       qualification,
       experienceYears,
+      consultationFee,
       profileImage,
       bio,
+      languages,
       clinicIds,
       availability,
     });

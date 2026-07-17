@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 const {
   DOCTOR_SPECIALIZATIONS,
 } = require('../../constants/doctorSpecializations');
+const {
+  DOCTOR_LANGUAGES,
+} = require('../../constants/doctorLanguages');
 
 const doctorSchema = new mongoose.Schema(
   {
@@ -33,6 +36,13 @@ const doctorSchema = new mongoose.Schema(
       min: [0, 'Experience cannot be negative'],
     },
 
+    consultationFee: {
+      type: Number,
+      required: [true, 'Consultation fee is required'],
+      min: [0, 'Consultation fee cannot be negative'],
+    },
+
+
     profileImage: {
       type: String,
       default: '',
@@ -44,6 +54,13 @@ const doctorSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+
+    languages: [
+      {
+        type: String,
+        enum: DOCTOR_LANGUAGES,
+      },
+    ],
 
     averageRating: {
       type: Number,
