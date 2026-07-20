@@ -32,6 +32,13 @@ const getDoctorById = async (
     return null;
   }
 
+  const {
+    clinicIds,
+    ...doctorData
+  } = doctor;
+
+  doctorData.clinics = clinicIds;
+
   const bookedAppointments =
     await Appointment.find({
       doctorId,
@@ -67,24 +74,17 @@ const getDoctorById = async (
     weekday: 'long',
   });
 
-  if (!doctor.availability.workingDays.includes(dayName)) {
-    return {
-      doctor,
-      availableSlots: [],
-    };
-  }
-
-  const {
-    clinicIds,
-    ...doctorData
-  } = doctor;
-
-  doctorData.clinics = clinicIds;
-
+if (!doctor.availability.workingDays.includes(dayName)) {
   return {
     doctor: doctorData,
-    availableSlots,
+    availableSlots: [],
   };
+}
+
+return {
+  doctor: doctorData,
+  availableSlots,
+};
 };
 
 const validateClinicIds = async (clinicIds = []) => {
