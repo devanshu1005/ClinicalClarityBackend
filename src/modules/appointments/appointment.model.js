@@ -51,11 +51,17 @@ const appointmentSchema = new mongoose.Schema(
   }
 );
 
-appointmentSchema.index({
-  doctorId: 1,
-  appointmentDate: 1,
-  startTime: 1,
-});
+appointmentSchema.index(
+  {
+    doctorId: 1,
+    clinicId: 1,
+    appointmentDate: 1,
+    startTime: 1,
+  },
+  {
+    unique: true,
+  }
+);
 
 module.exports = mongoose.model(
   'Appointment',

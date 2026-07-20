@@ -9,22 +9,24 @@ const createDoctor = async (payload) => {
 };
 
 const getAllDoctors = async () => {
-  const doctors = await Doctor.find({ isActive: true })
-    .populate('clinicIds', 'name shortAddress fullAddress thumbnailImage')
-    .sort({ createdAt: -1 });
-
-  return doctors;
+  return await Doctor.find()
+    .populate(
+      "clinics.clinicId",
+      "name shortAddress location"
+    )
+    .lean();
 };
 
 const getDoctorById = async (
   doctorId,
+  clinicId,
   appointmentDate
 ) => {
 
   const doctor = await Doctor.findById(doctorId)
     .populate(
-      'clinicIds',
-      'name shortAddress location'
+      "clinics.clinicId",
+      "name shortAddress location"
     )
     .lean();
 
@@ -32,59 +34,60 @@ const getDoctorById = async (
     return null;
   }
 
-  const {
-    clinicIds,
-    ...doctorData
-  } = doctor;
+  const selectedClinic = doctor.clinics.find(
+    (clinic) =>
+      clinic.clinicId._id.toString() === clinicId
+  );
 
-  doctorData.clinics = clinicIds;
+  if (!selectedClinic) {
+    return null;
+  }
 
-  const bookedAppointments =
-    await Appointment.find({
-      doctorId,
-      appointmentDate,
-      status: "BOOKED",
-    });
+  const availability = selectedClinic.availability;
 
-  const bookedSlotSet =
-    new Set(
-      bookedAppointments.map(
-        (appointment) =>
-          `${appointment.startTime}-${appointment.endTime}`
-      )
-    );
-
-  const generatedSlots =
-    generateSlots(
-      doctor.availability.startTime,
-      doctor.availability.endTime,
-      doctor.availability.slotDuration
-    );
-
-  const availableSlots =
-    generatedSlots.filter((slot) => {
-
-      const key =
-        `${slot.start}-${slot.end}`;
-
-      return !bookedSlotSet.has(key);
-    });
-
-  const dayName = new Date(appointmentDate).toLocaleDateString('en-US', {
-    weekday: 'long',
+  const bookedAppointments = await Appointment.find({
+    doctorId,
+    clinicId,
+    appointmentDate,
+    status: "BOOKED",
   });
 
-if (!doctor.availability.workingDays.includes(dayName)) {
-  return {
-    doctor: doctorData,
-    availableSlots: [],
-  };
-}
+  const bookedSlotSet = new Set(
+    bookedAppointments.map(
+      (appointment) =>
+        `${appointment.startTime}-${appointment.endTime}`
+    )
+  );
 
-return {
-  doctor: doctorData,
-  availableSlots,
-};
+  const generatedSlots = generateSlots(
+    availability.startTime,
+    availability.endTime,
+    availability.slotDuration
+  );
+
+  const availableSlots = generatedSlots.filter((slot) => {
+    const key = `${slot.start}-${slot.end}`;
+    return !bookedSlotSet.has(key);
+  });
+
+  const dayName = new Date(appointmentDate).toLocaleDateString(
+    "en-US",
+    {
+      weekday: "long",
+    }
+  );
+
+  if (!availability.workingDays.includes(dayName)) {
+    return {
+      doctor,
+      availableSlots: [],
+    };
+  }
+
+  return {
+    doctor,
+    availableSlots,
+  };
 };
 
 const validateClinicIds = async (clinicIds = []) => {
@@ -126,11 +129,10 @@ const getNearbyDoctors = async (
       $lookup: {
         from: 'doctors',
         localField: '_id',
-        foreignField: 'clinicIds',
+        foreignField: 'clinics.clinicId',
         as: 'doctors',
       },
     },
-
     {
       $unwind: '$doctors',
     },
@@ -238,10 +240,10 @@ const getPopularDoctors = async (limit = 10) => {
 
     {
       $lookup: {
-        from: 'clinics',
-        localField: 'clinicIds',
-        foreignField: '_id',
-        as: 'clinics',
+        from: "clinics",
+        localField: "clinics.clinicId",
+        foreignField: "_id",
+        as: "clinicDetails",
       },
     },
 
@@ -259,13 +261,27 @@ const getPopularDoctors = async (limit = 10) => {
 
         clinics: {
           $map: {
-            input: '$clinics',
-            as: 'clinic',
+            input: "$clinics",
+            as: "doctorClinic",
             in: {
-              _id: '$$clinic._id',
-              name: '$$clinic.name',
-              shortAddress: '$$clinic.shortAddress',
-              thumbnailImage: '$$clinic.thumbnailImage',
+              clinic: {
+                $arrayElemAt: [
+                  {
+                    $filter: {
+                      input: "$clinicDetails",
+                      as: "clinic",
+                      cond: {
+                        $eq: [
+                          "$$clinic._id",
+                          "$$doctorClinic.clinicId",
+                        ],
+                      },
+                    },
+                  },
+                  0,
+                ],
+              },
+              availability: "$$doctorClinic.availability",
             },
           },
         },
@@ -275,9 +291,7 @@ const getPopularDoctors = async (limit = 10) => {
 };
 
 const searchDoctors = async (query) => {
-
   return Doctor.aggregate([
-
     {
       $match: {
         isActive: true,
@@ -287,132 +301,117 @@ const searchDoctors = async (query) => {
     {
       $lookup: {
         from: "clinics",
-        localField: "clinicIds",
+        localField: "clinics.clinicId",
         foreignField: "_id",
-        as: "clinics",
+        as: "clinicDetails",
       },
     },
 
     {
       $match: {
-
         $or: [
-
           {
             name: {
               $regex: query,
               $options: "i",
             },
           },
-
           {
             specialization: {
               $regex: query,
               $options: "i",
             },
           },
-
           {
             qualification: {
               $regex: query,
               $options: "i",
             },
           },
-
           {
-            "clinics.name": {
+            "clinicDetails.name": {
               $regex: query,
               $options: "i",
             },
           },
-
           {
-            "clinics.shortAddress": {
+            "clinicDetails.shortAddress": {
               $regex: query,
               $options: "i",
             },
           },
-
           {
-            "clinics.fullAddress": {
+            "clinicDetails.fullAddress": {
               $regex: query,
               $options: "i",
             },
           },
-
         ],
-
       },
     },
 
     {
       $project: {
-
         _id: 1,
-
         name: 1,
-
         specialization: 1,
-
         qualification: 1,
-
         experienceYears: 1,
-
         consultationFee: 1,
-
         profileImage: 1,
-
         averageRating: 1,
-
         totalReviews: 1,
 
         clinics: {
-
           $map: {
-
             input: "$clinics",
-
-            as: "clinic",
-
+            as: "doctorClinic",
             in: {
-
-              _id: "$$clinic._id",
-
-              name: "$$clinic.name",
-
-              shortAddress:
-                "$$clinic.shortAddress",
-
-              thumbnailImage:
-                "$$clinic.thumbnailImage",
-
+              $let: {
+                vars: {
+                  clinic: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$clinicDetails",
+                          as: "c",
+                          cond: {
+                            $eq: [
+                              "$$c._id",
+                              "$$doctorClinic.clinicId",
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+                in: {
+                  _id: "$$clinic._id",
+                  name: "$$clinic.name",
+                  shortAddress: "$$clinic.shortAddress",
+                  thumbnailImage: "$$clinic.thumbnailImage",
+                  availability: "$$doctorClinic.availability",
+                },
+              },
             },
-
           },
-
         },
-
       },
-
     },
 
     {
       $sort: {
-
         averageRating: -1,
-
         totalReviews: -1,
-
       },
-
     },
 
     {
       $limit: 20,
     },
-
   ]);
-
 };
 
 module.exports = {

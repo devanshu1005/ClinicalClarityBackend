@@ -74,43 +74,47 @@ const doctorSchema = new mongoose.Schema(
       default: 0,
     },
 
-    clinicIds: [
+    clinics: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Clinic',
-        required: true,
+        clinicId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Clinic',
+          required: true,
+        },
+
+        availability: {
+          workingDays: [
+            {
+              type: String,
+              enum: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+              ],
+            },
+          ],
+
+          startTime: {
+            type: String,
+            required: true,
+          },
+
+          endTime: {
+            type: String,
+            required: true,
+          },
+
+          slotDuration: {
+            type: Number,
+            required: true,
+          },
+        },
       },
     ],
-
-    availability: {
-      workingDays: [
-        {
-          type: String,
-          enum: [
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-            'Sunday'
-          ]
-        }
-      ],
-
-      startTime: {
-        type: String
-      },
-
-      endTime: {
-        type: String
-      },
-
-      slotDuration: {
-        type: Number
-      }
-    },
-
     isActive: {
       type: Boolean,
       default: true,
