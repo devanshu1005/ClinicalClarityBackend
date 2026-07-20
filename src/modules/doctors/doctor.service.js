@@ -112,8 +112,8 @@ const validateClinicIds = async (clinicIds = []) => {
 };
 
 const getDoctorsByClinicId = async (clinicId) => {
-  const doctors = await Doctor.find({
-    clinicIds: clinicId,
+  return Doctor.find({
+    "clinics.clinicId": clinicId,
     isActive: true,
   }).sort({ createdAt: -1 });
 
@@ -280,24 +280,46 @@ const getPopularDoctors = async (limit = 10) => {
             input: "$clinics",
             as: "doctorClinic",
             in: {
-              clinic: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: "$clinicDetails",
-                      as: "clinic",
-                      cond: {
-                        $eq: [
-                          "$$clinic._id",
-                          "$$doctorClinic.clinicId",
-                        ],
+              $let: {
+                vars: {
+                  clinic: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$clinicDetails",
+                          as: "c",
+                          cond: {
+                            $eq: [
+                              "$$c._id",
+                              "$$doctorClinic.clinicId",
+                            ],
+                          },
+                        },
                       },
-                    },
+                      0,
+                    ],
                   },
-                  0,
-                ],
+                },
+                in: {
+                  _id: "$$clinic._id",
+                  name: "$$clinic.name",
+                  shortAddress: "$$clinic.shortAddress",
+                  fullAddress: "$$clinic.fullAddress",
+                  city: "$$clinic.city",
+                  state: "$$clinic.state",
+                  postalCode: "$$clinic.postalCode",
+                  country: "$$clinic.country",
+                  thumbnailImage: "$$clinic.thumbnailImage",
+                  coverImage: "$$clinic.coverImage",
+                  galleryImages: "$$clinic.galleryImages",
+                  doctorCount: "$$clinic.doctorCount",
+                  doctorPreviewImages: "$$clinic.doctorPreviewImages",
+                  infoCard: "$$clinic.infoCard",
+                  ctaLabel: "$$clinic.ctaLabel",
+                  location: "$$clinic.location",
+                  availability: "$$doctorClinic.availability",
+                },
               },
-              availability: "$$doctorClinic.availability",
             },
           },
         },
