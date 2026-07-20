@@ -9,12 +9,20 @@ const createDoctor = async (payload) => {
 };
 
 const getAllDoctors = async () => {
-  return await Doctor.find()
+  const doctors = await Doctor.find()
     .populate(
       "clinics.clinicId",
       "name shortAddress location"
     )
     .lean();
+
+  return doctors.map((doctor) => ({
+    ...doctor,
+    clinics: doctor.clinics.map((clinic) => ({
+      ...clinic.clinicId,
+      availability: clinic.availability,
+    })),
+  }));
 };
 
 const getDoctorById = async (
@@ -77,15 +85,23 @@ const getDoctorById = async (
     }
   );
 
+  const doctorResponse = {
+    ...doctor,
+    clinics: doctor.clinics.map((clinic) => ({
+      ...clinic.clinicId,
+      availability: clinic.availability,
+    })),
+  };
+
   if (!availability.workingDays.includes(dayName)) {
     return {
-      doctor,
+      doctor: doctorResponse,
       availableSlots: [],
     };
   }
 
   return {
-    doctor,
+    doctor: doctorResponse,
     availableSlots,
   };
 };
