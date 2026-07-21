@@ -23,7 +23,38 @@ const getBookedAppointments = async (doctorId, date) => {
   });
 };
 
+const getAppointments = async (
+  patientId,
+  status
+) => {
+  const filter = {
+    patientId,
+  };
+
+  if (status) {
+    filter.status = status;
+  }
+
+  return Appointment.find(filter)
+    .populate({
+      path: "doctorId",
+      select:
+        "name specialization qualification experienceYears profileImage averageRating totalReviews",
+    })
+    .populate({
+      path: "clinicId",
+      select:
+        "name shortAddress fullAddress thumbnailImage coverImage location",
+    })
+    .sort({
+      appointmentDate: -1,
+      startTime: -1,
+    })
+    .lean();
+};
+
 module.exports = {
   bookAppointment,
   getBookedAppointments,
+  getAppointments,
 };

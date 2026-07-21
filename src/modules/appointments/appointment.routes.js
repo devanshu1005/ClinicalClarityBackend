@@ -8,4 +8,10 @@ router.post(
   appointmentController.bookAppointment
 );
 
+router.get(
+  "/",
+  authMiddleware,
+  appointmentController.getAppointments
+);
+
 module.exports = router;

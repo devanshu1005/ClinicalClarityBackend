@@ -57,6 +57,9 @@ appointmentSchema.index(
     clinicId: 1,
     appointmentDate: 1,
     startTime: 1,
+    patientId: 1,
+    status: 1,
+    appointmentDate: -1,
   },
   {
     unique: true,
