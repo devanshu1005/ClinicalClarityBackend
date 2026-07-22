@@ -17,5 +17,6 @@ router.use('/doctors', require('../modules/doctors/doctor.routes'));
 router.use('/appointments', require('../modules/appointments/appointment.routes'));
 router.use('/reviews', require('../modules/reviews/doctorReview.routes'));
 router.use('/dashboard', require('../modules/dashboard/dashboard.routes'));
+router.use('/users', require('../modules/users/user.routes'));
 
 module.exports = router;
