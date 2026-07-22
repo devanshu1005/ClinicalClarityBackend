@@ -53,8 +53,30 @@ const getAppointments = async (
     .lean();
 };
 
+const getAppointmentById = async (
+  appointmentId,
+  patientId
+) => {
+  return Appointment.findOne({
+    _id: appointmentId,
+    patientId,
+  })
+    .populate({
+      path: "doctorId",
+      select:
+        "name specialization qualification experienceYears profileImage bio averageRating totalReviews languages",
+    })
+    .populate({
+      path: "clinicId",
+      select:
+        "name shortAddress fullAddress thumbnailImage coverImage galleryImages location infoCard ctaLabel",
+    })
+    .lean();
+};
+
 module.exports = {
   bookAppointment,
   getBookedAppointments,
   getAppointments,
+  getAppointmentById,
 };

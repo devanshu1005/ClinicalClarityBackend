@@ -84,7 +84,40 @@ const getAppointments = async (req, res, next) => {
   }
 };
 
+const getAppointmentById = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { appointmentId } = req.params;
+    const patientId = req.user.userId;
+
+    const appointment =
+      await appointmentService.getAppointmentById(
+        appointmentId,
+        patientId
+      );
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Appointment fetched successfully",
+      data: appointment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   bookAppointment,
   getAppointments,
+  getAppointmentById,
 };

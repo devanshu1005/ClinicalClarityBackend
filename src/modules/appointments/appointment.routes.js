@@ -14,4 +14,10 @@ router.get(
   appointmentController.getAppointments
 );
 
+router.get(
+  "/:appointmentId",
+  authMiddleware,
+  appointmentController.getAppointmentById
+);
+
 module.exports = router;
