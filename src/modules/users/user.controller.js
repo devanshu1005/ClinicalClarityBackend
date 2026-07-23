@@ -1,4 +1,5 @@
 const userService = require("./user.service");
+const uploadImage = require("../../utils/uploadImage");
 
 const updateProfile = async (
   req,
@@ -17,6 +18,17 @@ const updateProfile = async (
       address,
     } = req.body;
 
+    let profileImage;
+
+    if (req.file) {
+      const image = await uploadImage(
+        req.file.buffer,
+        "clinical-clarity/profile-images"
+      );
+
+      profileImage = image.secure_url;
+    }
+
     const user =
       await userService.updateProfile(userId, {
         name,
@@ -25,6 +37,7 @@ const updateProfile = async (
         bloodGroup,
         mobileNumber,
         address,
+        profileImage,
       });
 
     return res.status(200).json({
