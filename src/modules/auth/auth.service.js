@@ -94,6 +94,18 @@ const verifyOtp = async ({ email, otp }) => {
     user: {
       _id: user._id,
       email: user.email,
+      isEmailVerified: user.isEmailVerified,
+      authProvider: user.authProvider,
+      name: user.name,
+      gender: user.gender,
+      age: user.age,
+      bloodGroup: user.bloodGroup,
+      mobileNumber: user.mobileNumber,
+      profileImage: user.profileImage,
+      address: user.address,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     },
   };
 };
